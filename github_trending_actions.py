@@ -2,6 +2,7 @@
 """
 GitHub Trending Reporter for GitHub Actions
 使用环境变量配置，适配CI/CD环境
+兼容Python 3.9+
 """
 
 import json
@@ -12,6 +13,10 @@ import time
 import os
 from datetime import datetime
 
+# 检查Python版本
+PYTHON_VERSION = sys.version_info
+print(f"🐍 Python版本: {PYTHON_VERSION.major}.{PYTHON_VERSION.minor}.{PYTHON_VERSION.micro}")
+
 # 从环境变量读取配置
 def load_config_from_env():
     """从环境变量加载配置"""
@@ -20,7 +25,7 @@ def load_config_from_env():
         'telegram_chat_id': os.getenv('TELEGRAM_CHAT_ID'),
         'tavily_api_key': os.getenv('TAVILY_API_KEY'),
         'github_token': os.getenv('GITHUB_TOKEN') or os.getenv('GH_TOKEN'),
-        'user_agent': 'GitHub-Trending-Actions/1.0'
+        'user_agent': f'GitHub-Trending-Actions/1.0 (Python {PYTHON_VERSION.major}.{PYTHON_VERSION.minor})'
     }
     
     # 验证必要配置
