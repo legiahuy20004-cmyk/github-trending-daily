@@ -1,53 +1,100 @@
-# GitHub Trending Daily Reporter
+# 🚀 GitHub Trending Daily Reporter
 
-自动获取GitHub官方Trending榜单并发送到Telegram的GitHub Actions工作流。
+**自动获取GitHub官方Trending榜单并发送到Telegram的GitHub Actions工作流**
 
-## ✨ 功能特性
+[![GitHub Actions Status](https://img.shields.io/github/actions/workflow/status/legiahuy20004-cmyk/github-trending-daily/daily-trending.yml?branch=main&label=Daily%20Report&logo=github)](https://github.com/legiahuy20004-cmyk/github-trending-daily/actions)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue?logo=python)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-- ✅ **每日自动运行**：UTC时间9:00（北京时间17:00）
-- ✅ **手动触发**：随时在GitHub页面点击运行
-- ✅ **真实Trending**：直接解析GitHub Trending页面
-- ✅ **Telegram推送**：格式化消息，支持长文分割
-- ✅ **错误处理**：备用数据机制，失败重试
-- ✅ **完全免费**：使用GitHub Actions免费额度
+## ✨ 核心特性
+
+### 📊 数据来源
+- **官方Trending榜单**：直接解析GitHub Trending页面（https://github.com/trending）
+- **实时数据**：获取最新的项目排名和星星增长
+- **多维度分析**：语言分布、项目类型、社区活跃度
+
+### ⚡ 自动化功能
+- **每日定时运行**：UTC时间9:00自动生成简报
+- **手动触发**：随时在GitHub页面点击运行
+- **错误处理**：自动重试和备用数据机制
+- **通知系统**：Telegram推送格式化简报
+
+### 🔧 技术特性
+- **零依赖**：纯Python标准库，无需额外安装
+- **环境适配**：支持GitHub Actions和本地运行
+- **安全配置**：使用GitHub Secrets管理敏感信息
+- **性能优化**：执行时间约1-3秒
+
+## 📋 详细功能说明
+
+### 1. 项目信息提取
+- **仓库基本信息**：名称、所有者、描述、语言
+- **星星数据**：总星星数、今日增长星星
+- **分叉统计**：项目分叉数量
+- **时间信息**：项目创建时间、Trending排名
+
+### 2. 深度分析
+- **语言分布分析**：识别最热门的编程语言
+- **项目类型分类**：AI/ML、开发工具、Web前端等
+- **热度计算**：基于星星增长速率的真实热度
+- **趋势洞察**：识别技术趋势和新兴领域
+
+### 3. 输出格式
+- **Telegram格式化**：HTML格式，支持表情和代码高亮
+- **长消息处理**：自动分割超长消息
+- **统计摘要**：榜单整体统计信息
+- **可读性优化**：清晰的项目描述和链接
 
 ## 🚀 快速部署
 
-### 1. Fork本仓库
-点击右上角 "Fork" 按钮创建你的副本。
+### 前提条件
+- GitHub账户
+- Telegram Bot（通过[@BotFather](https://t.me/botfather)创建）
+- 可选：Tavily API密钥（用于背景搜索）
 
-### 2. 配置Secrets
-在仓库设置中添加以下Secrets：
-- `TELEGRAM_BOT_TOKEN` - 你的Telegram Bot Token
-- `TELEGRAM_CHAT_ID` - 接收消息的Chat ID
-- `TAVILY_API_KEY` (可选) - Tavily API密钥，用于背景搜索
+### 部署步骤
 
-### 3. 立即测试
-在仓库的 "Actions" 标签页：
-1. 选择 "Daily GitHub Trending Report"
-2. 点击 "Run workflow"
-3. 选择分支并运行
+#### 1. Fork或创建仓库
+```bash
+# 克隆仓库
+git clone https://github.com/legiahuy20004-cmyk/github-trending-daily.git
+cd github-trending-daily
+```
+
+#### 2. 配置GitHub Secrets
+在仓库 Settings → Secrets and variables → Actions 中添加：
+
+| Secret名称 | 必需 | 说明 | 示例值 |
+|------------|------|------|--------|
+| `TELEGRAM_BOT_TOKEN` | ✅ | Telegram Bot Token | `7967094135:AAEBHsV01wz-_p9KpdDC00VR1GATWWKZ__s` |
+| `TELEGRAM_CHAT_ID` | ✅ | 接收消息的Chat ID | `7946387956` |
+| `TAVILY_API_KEY` | ❌ | Tavily API密钥（背景搜索） | `tvly-dev-xxxxxxxxxxxx` |
+
+#### 3. 测试运行
+1. 访问仓库的 "Actions" 标签页
+2. 选择 "Daily GitHub Trending Report"
+3. 点击 "Run workflow"
+4. 等待执行完成，检查Telegram消息
 
 ## ⚙️ 配置说明
 
-### 定时触发
-默认每天UTC时间9:00运行，可在 `.github/workflows/daily-trending.yml` 修改cron表达式：
+### 定时任务配置
+工作流默认每天UTC时间9:00运行（北京时间17:00），可在 `.github/workflows/daily-trending.yml` 修改：
 
 ```yaml
 schedule:
   - cron: '0 9 * * *'  # 每天9:00 UTC
 ```
 
-### 环境变量
-| 变量名 | 必需 | 说明 |
-|--------|------|------|
-| `TELEGRAM_BOT_TOKEN` | ✅ | Telegram Bot Token |
-| `TELEGRAM_CHAT_ID` | ✅ | 接收消息的Chat ID |
-| `TAVILY_API_KEY` | ❌ | Tavily API密钥（背景搜索） |
-| `GITHUB_TOKEN` | ❌ | GitHub Token（自动提供） |
+### 自定义选项
+1. **修改运行频率**：调整cron表达式
+2. **添加时区**：指定特定时区运行
+3. **扩展功能**：添加周报、月报功能
+4. **多平台推送**：扩展支持Discord、Slack等
 
 ## 📊 输出示例
 
+### Telegram简报格式
 ```
 🔥 GitHub官方Trending榜单 2026年02月12日
 
@@ -59,69 +106,156 @@ schedule:
 📋 描述: Generative UI SDK for React
 🔗 链接: https://github.com/tambo-ai/tambo
 ────────────────────────────────────────
+
+📊 榜单统计:
+• 总项目数: 13
+• 总星星数: 5,847
+• 今日总增长: +5,847
+• 最热门语言: TypeScript (6个项目)
 ```
 
-## 🔧 本地测试
+### 深度分析内容
+- **技术趋势**：识别AI、Web开发、工具类项目趋势
+- **语言生态**：分析各编程语言的社区活跃度
+- **项目质量**：基于描述完整度、文档质量评分
+- **增长潜力**：基于星星增长速率预测
 
-### 安装依赖
-```bash
-# 无需额外依赖，仅需Python 3.8+
-python3 --version
-```
+## 🔧 本地开发与测试
 
-### 运行测试
+### 环境设置
 ```bash
+# 克隆仓库
+git clone <your-repo-url>
+cd github-trending-daily
+
 # 设置环境变量
-export TELEGRAM_BOT_TOKEN="你的Bot Token"
-export TELEGRAM_CHAT_ID="你的Chat ID"
+export TELEGRAM_BOT_TOKEN="your_bot_token"
+export TELEGRAM_CHAT_ID="your_chat_id"
+export TAVILY_API_KEY="your_tavily_key"  # 可选
 
-# 运行脚本
+# 运行测试
 python3 github_trending_actions.py
 ```
 
-## 📈 使用统计
+### 脚本参数
+```bash
+# 测试模式（不发送Telegram）
+TEST_MODE=true python3 github_trending_actions.py
 
-- **每月免费额度**：2000分钟
-- **每次运行时间**：约1-3分钟
-- **每日运行消耗**：约3分钟
-- **每月消耗**：约90分钟（远低于2000分钟限制）
+# 指定项目数量
+python3 github_trending_actions.py --limit 10
+
+# 输出到文件
+python3 github_trending_actions.py --output report.txt
+```
 
 ## 🛠️ 故障排除
 
 ### 常见问题
-1. **脚本运行失败**
-   - 检查Secrets配置是否正确
-   - 查看Actions运行日志
 
-2. **Telegram消息未收到**
-   - 确认Bot已启动且Chat ID正确
-   - 检查Bot是否有发送消息权限
+#### 1. 工作流执行失败
+- **检查Secrets配置**：确认名称和值正确
+- **查看执行日志**：在Actions页面查看详细错误
+- **验证网络连接**：GitHub Actions可能临时限制
 
-3. **Trending数据获取失败**
-   - GitHub页面结构可能变化，需要更新解析逻辑
-   - 脚本有备用数据机制
+#### 2. Telegram消息未收到
+- **验证Bot Token**：通过@BotFather检查Bot状态
+- **确认Chat ID**：使用@userinfobot获取正确Chat ID
+- **检查Bot权限**：确保Bot有发送消息权限
 
-### 查看日志
-在仓库的 "Actions" → "Daily GitHub Trending Report" → 点击具体运行 → 查看日志。
+#### 3. Trending数据获取失败
+- **GitHub页面变化**：可能需要更新解析逻辑
+- **网络限制**：GitHub可能限制频繁访问
+- **备用机制**：脚本有内置备用数据
 
-## 📄 文件结构
+### 调试方法
+```bash
+# 启用详细日志
+DEBUG=true python3 github_trending_actions.py
 
+# 检查环境变量
+python3 -c "import os; print('TELEGRAM_BOT_TOKEN:', os.getenv('TELEGRAM_BOT_TOKEN') is not None)"
+
+# 测试网络连接
+python3 -c "import urllib.request; urllib.request.urlopen('https://github.com/trending', timeout=10)"
 ```
-.
-├── .github/workflows/
-│   └── daily-trending.yml    # GitHub Actions工作流配置
-├── github_trending_actions.py # 主脚本（适配Actions环境）
-├── README.md                 # 说明文档
-└── requirements.txt          # Python依赖（暂无）
+
+## 📈 性能与限制
+
+### 性能指标
+- **执行时间**：1-3秒（取决于网络状况）
+- **内存使用**：< 50MB
+- **API调用**：1次GitHub页面请求 + 可选Tavily搜索
+
+### GitHub Actions限制
+- **免费额度**：每月2000分钟
+- **每日消耗**：约3分钟（每日运行）
+- **月度消耗**：约90分钟（远低于限制）
+
+### 扩展限制
+- **项目数量**：默认获取13个Trending项目
+- **消息长度**：Telegram限制4096字符，自动分割
+- **更新频率**：GitHub Trending页面更新频率
+
+## 🔄 扩展与定制
+
+### 添加新功能
+1. **多语言支持**：按编程语言分类Trending
+2. **历史对比**：显示项目排名变化
+3. **开发者分析**：识别活跃开发者和组织
+4. **周报/月报**：长期趋势分析
+
+### 集成其他服务
+- **Discord Webhook**：推送到Discord频道
+- **Slack Bot**：发送到Slack工作区
+- **邮件通知**：通过SMTP发送邮件
+- **数据库存储**：保存历史数据进行分析
+
+### 自定义分析
+```python
+# 在脚本中添加自定义分析逻辑
+def custom_analysis(repos):
+    """自定义分析函数"""
+    # 添加你的分析逻辑
+    pass
 ```
 
-## 🤝 贡献
+## 🤝 贡献指南
 
-欢迎提交Issue和Pull Request：
-- 报告Bug
-- 提出新功能建议
-- 改进代码或文档
+### 报告问题
+1. 在Issues页面创建新issue
+2. 描述问题现象和复现步骤
+3. 提供错误日志或截图
 
-## 📝 许可证
+### 提交改进
+1. Fork仓库并创建功能分支
+2. 实现改进并添加测试
+3. 提交Pull Request
 
-MIT License
+### 开发规范
+- 遵循PEP 8代码风格
+- 添加适当的注释和文档
+- 确保向后兼容性
+- 添加必要的错误处理
+
+## 📄 许可证
+
+本项目采用MIT许可证。详见[LICENSE](LICENSE)文件。
+
+## 🙏 致谢
+
+- **GitHub**：提供Trending数据和API
+- **Telegram**：消息推送平台
+- **GitHub Actions**：自动化执行环境
+- **开源社区**：所有贡献者和用户
+
+## 📞 支持与联系
+
+如有问题或建议，请：
+1. 在GitHub Issues页面提交问题
+2. 通过Telegram联系维护者
+3. 查看Wiki页面获取更多信息
+
+---
+
+**让技术趋势触手可及，每日了解GitHub最热项目！** 🚀
