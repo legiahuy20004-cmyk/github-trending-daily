@@ -204,54 +204,167 @@ def get_fallback_trending():
         }
     ]
 
+def generate_detailed_analysis(repos):
+    """生成详细的项目分析"""
+    if not repos:
+        return ""
+    
+    analysis = "📈 <b>深度趋势分析</b>\n\n"
+    
+    # 1. 语言分布详细分析
+    languages = [r['language'] for r in repos if r['language'] != 'Unknown']
+    if languages:
+        from collections import Counter
+        lang_counts = Counter(languages)
+        total_projects = len(repos)
+        
+        analysis += "💻 <b>编程语言分布</b>\n"
+        for lang, count in lang_counts.most_common(5):
+            percentage = (count / total_projects) * 100
+            analysis += f"• <code>{lang}</code>: {count}个项目 ({percentage:.1f}%)\n"
+        analysis += "\n"
+    
+    # 2. 项目类型分析
+    ai_keywords = ['ai', 'llm', 'model', 'neural', 'deep', 'learning', 'machine', '智能', '模型', 'gpt', 'openai']
+    tool_keywords = ['sdk', 'tool', 'utility', 'framework', 'library', 'cli', '工具', '框架', 'plugin', 'extension']
+    web_keywords = ['web', 'react', 'vue', 'angular', '前端', 'ui', 'ux', 'javascript', 'typescript', '前端']
+    infra_keywords = ['infrastructure', 'devops', 'docker', 'kubernetes', '云', '部署', '监控']
+    
+    ai_projects = []
+    tool_projects = []
+    web_projects = []
+    infra_projects = []
+    other_projects = []
+    
+    for repo in repos:
+        desc_lower = repo['description'].lower()
+        if any(kw in desc_lower for kw in ai_keywords):
+            ai_projects.append(repo['full_name'])
+        elif any(kw in desc_lower for kw in tool_keywords):
+            tool_projects.append(repo['full_name'])
+        elif any(kw in desc_lower for kw in web_keywords):
+            web_projects.append(repo['full_name'])
+        elif any(kw in desc_lower for kw in infra_keywords):
+            infra_projects.append(repo['full_name'])
+        else:
+            other_projects.append(repo['full_name'])
+    
+    analysis += "🏷️ <b>项目类型分类</b>\n"
+    if ai_projects:
+        analysis += f"• 🤖 AI/机器学习: {len(ai_projects)}个\n"
+    if tool_projects:
+        analysis += f"• 🔧 开发工具: {len(tool_projects)}个\n"
+    if web_projects:
+        analysis += f"• 🌐 Web/前端: {len(web_projects)}个\n"
+    if infra_projects:
+        analysis += f"• 🏗️ 基础设施: {len(infra_projects)}个\n"
+    if other_projects:
+        analysis += f"• 📦 其他类型: {len(other_projects)}个\n"
+    analysis += "\n"
+    
+    # 3. 星星增长分析
+    total_stars = sum(r['stars'] for r in repos)
+    total_today = sum(r['stars_today'] for r in repos)
+    avg_stars = total_stars / len(repos) if repos else 0
+    avg_today = total_today / len(repos) if repos else 0
+    
+    analysis += "⭐ <b>星星增长分析</b>\n"
+    analysis += f"• 总星星数: <code>{total_stars:,}</code>\n"
+    analysis += f"• 今日总增长: <code>+{total_today:,}</code>\n"
+    analysis += f"• 平均星星数: <code>{avg_stars:,.0f}</code>\n"
+    analysis += f"• 平均今日增长: <code>+{avg_today:,.0f}</code>\n\n"
+    
+    # 4. 项目质量指标
+    has_desc_count = sum(1 for r in repos if r['description'] and len(r['description']) > 10)
+    has_language_count = sum(1 for r in repos if r['language'] != 'Unknown')
+    high_star_count = sum(1 for r in repos if r['stars'] > 100)
+    
+    analysis += "🏆 <b>项目质量指标</b>\n"
+    analysis += f"• 有详细描述: {has_desc_count}/{len(repos)}\n"
+    analysis += f"• 明确编程语言: {has_language_count}/{len(repos)}\n"
+    analysis += f"• 高星星项目(>100): {high_star_count}/{len(repos)}\n\n"
+    
+    # 5. 趋势洞察
+    analysis += "💡 <b>今日趋势洞察</b>\n"
+    
+    insights = []
+    if len(ai_projects) >= 3:
+        insights.append("• 🤖 AI/ML项目持续火热，反映技术前沿趋势")
+    if len(tool_projects) >= 3:
+        insights.append("• 🔧 开发者工具生态活跃，生产力工具受关注")
+    if 'TypeScript' in languages and languages.count('TypeScript') >= 3:
+        insights.append("• 📝 TypeScript在前端和工具领域占据主导")
+    if avg_today > 50:
+        insights.append("• 🚀 今日项目增长强劲，社区活跃度高")
+    if any(r['stars_today'] > 200 for r in repos):
+        insights.append("• ⭐ 有项目获得爆发式增长，值得关注")
+    
+    if insights:
+        analysis += '\n'.join(insights) + "\n"
+    else:
+        analysis += "• 📊 今日趋势相对平稳，各领域均衡发展\n"
+    
+    return analysis
+
 def generate_report(repos):
-    """生成Trending简报"""
+    """生成详细的Trending简报"""
     date_str = datetime.now().strftime('%Y年%m月%d日')
-    report = f"🔥 <b>GitHub官方Trending榜单</b> {date_str}\n\n"
-    report += "📌 <i>通过GitHub Actions自动生成</i>\n\n"
+    report = f"🔥 <b>GitHub官方Trending深度分析</b> {date_str}\n\n"
+    report += "📌 <i>通过GitHub Actions自动生成 · 每日技术趋势洞察</i>\n\n"
     
-    for repo in repos[:8]:  # 前8个
-        rank_emoji = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣"][repo['rank']-1]
+    # 项目详情（前6个）
+    for repo in repos[:6]:
+        rank_emoji = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣"][repo['rank']-1]
         
+        # 项目标题
         report += f"{rank_emoji} <b>第{repo['rank']}名: {repo['full_name']}</b>\n"
-        report += f"⭐ 总星星: <code>{repo['stars']:,}</code>"
         
+        # 核心指标
+        metrics = f"⭐ <code>{repo['stars']:,}</code>星星"
         if repo['stars_today'] > 0:
-            report += f" | 📈 今日增长: <code>+{repo['stars_today']}</code>"
+            metrics += f" | 📈 今日<code>+{repo['stars_today']}</code>"
+        metrics += f" | 🍴 <code>{repo['forks']}</code>分叉"
+        if repo['language'] != 'Unknown':
+            metrics += f" | 📝 {repo['language']}"
         
-        report += f" | 🍴 分叉: <code>{repo['forks']}</code>\n"
-        report += f"📝 语言: <code>{repo['language']}</code>\n"
+        report += f"{metrics}\n"
         
+        # 详细描述
         desc = repo['description']
-        if len(desc) > 120:
-            desc = desc[:117] + "..."
-        report += f"📋 描述: {desc}\n"
+        if desc and len(desc) > 5:
+            if len(desc) > 150:
+                desc = desc[:147] + "..."
+            report += f"📋 {desc}\n"
         
-        report += f"🔗 链接: {repo['url']}\n"
-        report += "─" * 40 + "\n\n"
+        # 项目类型标签
+        desc_lower = desc.lower() if desc else ""
+        tags = []
+        if any(kw in desc_lower for kw in ['ai', 'llm', 'model', 'neural', 'deep', 'learning', 'machine']):
+            tags.append("🤖 AI/ML")
+        if any(kw in desc_lower for kw in ['sdk', 'tool', 'utility', 'framework', 'library', 'cli']):
+            tags.append("🔧 工具")
+        if any(kw in desc_lower for kw in ['web', 'react', 'vue', 'angular', '前端', 'ui']):
+            tags.append("🌐 Web")
+        if any(kw in desc_lower for kw in ['infrastructure', 'devops', 'docker', 'kubernetes']):
+            tags.append("🏗️ 基础设施")
+        
+        if tags:
+            report += f"🏷️ {' · '.join(tags[:3])}\n"
+        
+        report += f"🔗 {repo['url']}\n"
+        report += "─" * 45 + "\n\n"
     
-    # 统计信息
-    if repos:
-        total_stars = sum(r['stars'] for r in repos)
-        total_today = sum(r['stars_today'] for r in repos)
-        languages = [r['language'] for r in repos if r['language'] != 'Unknown']
-        
-        report += "📊 <b>榜单统计</b>:\n"
-        report += f"• 总项目数: {len(repos)}\n"
-        report += f"• 总星星数: <code>{total_stars:,}</code>\n"
-        
-        if total_today > 0:
-            report += f"• 今日总增长: <code>+{total_today}</code>\n"
-        
-        if languages:
-            from collections import Counter
-            lang_counts = Counter(languages)
-            top_lang = lang_counts.most_common(1)[0]
-            report += f"• 最热门语言: <code>{top_lang[0]}</code> ({top_lang[1]}个项目)\n"
+    # 添加详细分析
+    report += generate_detailed_analysis(repos)
     
-    report += f"\n🕒 生成时间: {datetime.now().strftime('%H:%M UTC')}\n"
-    report += "⚡ 触发方式: GitHub Actions定时任务\n"
-    report += "🌐 数据源: https://github.com/trending"
+    # 元信息
+    report += "📊 <b>数据统计</b>\n"
+    report += f"• 分析项目数: {len(repos)}\n"
+    report += f"• 生成时间: {datetime.now().strftime('%H:%M UTC')}\n"
+    report += "• 数据来源: GitHub Trending页面\n"
+    report += "• 更新频率: 每日自动运行\n\n"
+    
+    report += "💡 <i>关注技术趋势，把握开发动向</i>"
     
     return report
 
